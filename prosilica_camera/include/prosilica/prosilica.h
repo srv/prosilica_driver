@@ -135,7 +135,7 @@ public:
 
   void setKillCallback(boost::function<void (unsigned long)> callback);
   //! Start capture.
-  void start(FrameStartTriggerMode = Freerun, tPvFloat32 frame_rate = 30, AcquisitionMode = Continuous);
+  void start(FrameStartTriggerMode = Freerun, tPvFloat32 frame_rate = 30, AcquisitionMode = Continuous, OutSelectorMode = SyncOut1);
   //! Stop capture.
   void stop();
   //! remove callback
