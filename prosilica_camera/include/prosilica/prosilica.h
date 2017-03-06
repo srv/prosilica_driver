@@ -112,6 +112,18 @@ enum OutSelectorMode
   SyncOut4
 };
 
+enum FormatMode
+{
+  Mono8;
+  Mono12;
+  Mono12Packed;
+  BayerRG8;
+  BayerRG12Packed;
+  BayerRG12;
+  RGB8Packed;
+  BGR8Packed
+};
+
 enum AutoSetting
 {
   Manual,
@@ -135,7 +147,7 @@ public:
 
   void setKillCallback(boost::function<void (unsigned long)> callback);
   //! Start capture.
-  void start(FrameStartTriggerMode = Freerun, tPvFloat32 frame_rate = 30, AcquisitionMode = Continuous);
+  void start(FrameStartTriggerMode = Freerun, tPvFloat32 frame_rate = 30, AcquisitionMode = Continuous, OutSelectorMode omode, FormatMode fmode);
   //! Stop capture.
   void stop();
   //! remove callback

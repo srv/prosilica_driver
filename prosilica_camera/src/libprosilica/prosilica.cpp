@@ -59,6 +59,7 @@ static const char* autoValues[] = {"Manual", "Auto", "AutoOnce"};
 static const char* triggerModes[] = {"Freerun", "SyncIn1", "SyncIn2", "FixedRate", "Software"};
 static const char* acquisitionModes[] = {"Continuous","SingleFrame","MultiFrame","Recorder"};
 static const char* outSelectorModes[] = {"SyncOut1","SyncOut2","SyncOut3","SyncOut4"};
+static const char* formatModes[] = {"Mono8", "Mono12", "Mono12Packed", "BayerRG8", "BayerRG12Packed", "BayerRG12", "RGB8Packed", "BGR8Packed"};
 static const char* errorStrings[] = {"No error",
                                      "Unexpected camera fault",
                                      "Unexpected fault in PvApi or driver",
@@ -258,7 +259,7 @@ void Camera::setKillCallback(boost::function<void (unsigned long UniqueId)> call
     killCallback_ = callback;
 }
 
-void Camera::start(FrameStartTriggerMode fmode, tPvFloat32 frame_rate, AcquisitionMode amode, OutSelectorMode omode)
+void Camera::start(FrameStartTriggerMode fmode, tPvFloat32 frame_rate, AcquisitionMode amode, OutSelectorMode omode, FormatMode fmode)
 {
     assert( FSTmode_ == None && fmode != None );
     ///@todo verify this assert again
@@ -285,6 +286,8 @@ void Camera::start(FrameStartTriggerMode fmode, tPvFloat32 frame_rate, Acquisiti
         CHECK_ERR( PvAttrEnumSet(handle_, "AcquisitionMode", acquisitionModes[amode]),
                    "Could not set acquisition mode" );
         CHECK_ERR( PvAttrEnumSet(handle_, "SyncOutSelector", outSelectorModes[omode]),
+                   "Could not set trigger mode" );
+        CHECK_ERR( PvAttrEnumSet(handle_, "PixelFormat", formatModes[fmode]),
                    "Could not set trigger mode" );
         CHECK_ERR( PvAttrEnumSet(handle_, "FrameStartTriggerMode", triggerModes[fmode]),
                    "Could not set trigger mode" );
