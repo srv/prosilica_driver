@@ -1,13 +1,13 @@
 /*********************************************************************
 * Software License Agreement (BSD License)
-* 
+*
 *  Copyright (c) 2008, Willow Garage, Inc.
 *  All rights reserved.
-* 
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
-* 
+*
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -17,7 +17,7 @@
 *   * Neither the name of the Willow Garage nor the names of its
 *     contributors may be used to endorse or promote products derived
 *     from this software without specific prior written permission.
-* 
+*
 *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -58,6 +58,7 @@ static const unsigned int MAX_CAMERA_LIST = 10;
 static const char* autoValues[] = {"Manual", "Auto", "AutoOnce"};
 static const char* triggerModes[] = {"Freerun", "SyncIn1", "SyncIn2", "FixedRate", "Software"};
 static const char* acquisitionModes[] = {"Continuous","SingleFrame","MultiFrame","Recorder"};
+static const char* outSelectorModes[] = {"SyncOut1","SyncOut2","SyncOut3","SyncOut4"};
 static const char* errorStrings[] = {"No error",
                                      "Unexpected camera fault",
                                      "Unexpected fault in PvApi or driver",
@@ -168,7 +169,7 @@ static void openCamera(boost::function<tPvErr (tPvCameraInfo*)> info_fn,
     throw ProsilicaException(ePvErrAccessDenied,
                              "Unable to open camera as master. "
                              "Another process is already using it.");
-  
+
   CHECK_ERR( open_fn(ePvAccessMaster), "Unable to open requested camera" );
 }
 
@@ -177,7 +178,7 @@ Camera::Camera(unsigned long guid, size_t bufferSize)
 {
   openCamera(boost::bind(PvCameraInfo, guid, _1),
              boost::bind(PvCameraOpen, guid, _1, &handle_));
-  
+
   setup();
 }
 
@@ -188,7 +189,7 @@ Camera::Camera(const char* ip_address, size_t bufferSize)
   tPvIpSettings settings;
   openCamera(boost::bind(PvCameraInfoByAddr, addr, _1, &settings),
              boost::bind(PvCameraOpenByAddr, addr, _1, &handle_));
-  
+
   setup();
 }
 
@@ -210,11 +211,11 @@ void Camera::setup()
   // capture whole frame by default
   setBinning();
   setRoiToWholeFrame();
-  
+
   // query for attributes (TODO: more)
   CHECK_ERR( PvAttrUint32Get(handle_, "TotalBytesPerFrame", &frameSize_),
              "Unable to retrieve frame size" );
-  
+
   // allocate frame buffers
   frames_ = new tPvFrame[bufferSize_];
   memset(frames_, 0, sizeof(tPvFrame) * bufferSize_);
@@ -232,7 +233,7 @@ Camera::~Camera()
 {
   PvLinkCallbackUnRegister(Camera::kill, ePvLinkRemove);
   stop();
-  
+
   PvCameraClose(handle_);
 
   if (frames_)
@@ -257,7 +258,7 @@ void Camera::setKillCallback(boost::function<void (unsigned long UniqueId)> call
     killCallback_ = callback;
 }
 
-void Camera::start(FrameStartTriggerMode fmode, tPvFloat32 frame_rate, AcquisitionMode amode)
+void Camera::start(FrameStartTriggerMode fmode, tPvFloat32 frame_rate, AcquisitionMode amode, OutSelectorMode omode)
 {
     assert( FSTmode_ == None && fmode != None );
     ///@todo verify this assert again
@@ -283,6 +284,8 @@ void Camera::start(FrameStartTriggerMode fmode, tPvFloat32 frame_rate, Acquisiti
         ///@todo take this one also as an argument
         CHECK_ERR( PvAttrEnumSet(handle_, "AcquisitionMode", acquisitionModes[amode]),
                    "Could not set acquisition mode" );
+        CHECK_ERR( PvAttrEnumSet(handle_, "SyncOutSelector", outSelectorModes[omode]),
+                   "Could not set trigger mode" );
         CHECK_ERR( PvAttrEnumSet(handle_, "FrameStartTriggerMode", triggerModes[fmode]),
                    "Could not set trigger mode" );
         CHECK_ERR( PvCommandRun(handle_, "AcquisitionStart"),
@@ -294,7 +297,7 @@ void Camera::start(FrameStartTriggerMode fmode, tPvFloat32 frame_rate, Acquisiti
     }
     FSTmode_ = fmode;
     Amode_ = amode;
-    
+
     CHECK_ERR( PvAttrFloat32Set(handle_, "FrameRate", frame_rate),
 	           "Could not set frame rate");
 }
@@ -303,7 +306,7 @@ void Camera::stop()
 {
   if (FSTmode_ == None)
     return;
-  
+
   PvCommandRun(handle_, "AcquisitionStop");
   PvCaptureQueueClear(handle_);
   PvCaptureEnd(handle_);
@@ -427,7 +430,7 @@ void Camera::setBinning(unsigned int binning_x, unsigned int binning_y)
   // Permit setting to "no binning" on cameras without binning support
   if (!hasAttribute("BinningX") && binning_x == 1 && binning_y == 1)
     return;
-  
+
   CHECK_ERR( PvAttrUint32Set(handle_, "BinningX", binning_x),
              "Couldn't set horizontal binning" );
   CHECK_ERR( PvAttrUint32Set(handle_, "BinningY", binning_y),
@@ -467,7 +470,7 @@ void Camera::getAttribute(const std::string &name, tPvUint32 &value)
   std::string err_msg = "Couldn't get attribute " + name;
   CHECK_ERR( PvAttrUint32Get(handle_, name.c_str(), &value),
 	     err_msg.c_str());
-             
+
 }
 
 void Camera::getAttribute(const std::string &name, tPvFloat32 &value)
@@ -552,7 +555,7 @@ void Camera::readUserMemory(char* data, size_t size)
   assert(size <= USER_MEMORY_SIZE);
 
   unsigned char buffer[USER_MEMORY_SIZE];
-  
+
   CHECK_ERR( PvMemoryRead(handle_, USER_ADDRESS, USER_MEMORY_SIZE, buffer),
              "Couldn't read from user memory" );
 
