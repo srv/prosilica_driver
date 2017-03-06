@@ -24,6 +24,7 @@
       exposure_auto_target: 50
       gain_auto_max: 24
       gain_auto_target: 50
+      sync_out_selector: SyncOut1
   right:
     right:
       trigger_mode: "syncin1"
@@ -49,3 +50,4 @@
       exposure_auto_target: 50
       gain_auto_max: 24
       gain_auto_target: 50
+      sync_out_selector: SyncOut1

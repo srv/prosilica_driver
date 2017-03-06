@@ -58,7 +58,6 @@ static const unsigned int MAX_CAMERA_LIST = 10;
 static const char* autoValues[] = {"Manual", "Auto", "AutoOnce"};
 static const char* triggerModes[] = {"Freerun", "SyncIn1", "SyncIn2", "FixedRate", "Software"};
 static const char* acquisitionModes[] = {"Continuous","SingleFrame","MultiFrame","Recorder"};
-static const char* outSelectorModes[] = {"SyncOut1","SyncOut2","SyncOut3","SyncOut4"};
 static const char* formatModes[] = {"Mono8", "Mono12", "Mono12Packed", "BayerRG8", "BayerRG12Packed", "BayerRG12", "RGB8Packed", "BGR8Packed"};
 static const char* errorStrings[] = {"No error",
                                      "Unexpected camera fault",
@@ -259,7 +258,7 @@ void Camera::setKillCallback(boost::function<void (unsigned long UniqueId)> call
     killCallback_ = callback;
 }
 
-void Camera::start(FrameStartTriggerMode fmode, tPvFloat32 frame_rate, AcquisitionMode amode, OutSelectorMode omode, FormatMode fmode)
+void Camera::start(FrameStartTriggerMode fmode, tPvFloat32 frame_rate, AcquisitionMode amode, PixelFormatMode pfmode)
 {
     assert( FSTmode_ == None && fmode != None );
     ///@todo verify this assert again
@@ -285,9 +284,17 @@ void Camera::start(FrameStartTriggerMode fmode, tPvFloat32 frame_rate, Acquisiti
         ///@todo take this one also as an argument
         CHECK_ERR( PvAttrEnumSet(handle_, "AcquisitionMode", acquisitionModes[amode]),
                    "Could not set acquisition mode" );
-        CHECK_ERR( PvAttrEnumSet(handle_, "SyncOutSelector", outSelectorModes[omode]),
-                   "Could not set trigger mode" );
-        CHECK_ERR( PvAttrEnumSet(handle_, "PixelFormat", formatModes[fmode]),
+
+        if (fmode == FixedRate)
+        {
+          // Only Left
+          CHECK_ERR( PvAttrEnumSet(handle_, "SyncOut1Mode", "Strobe1"),
+                     "Could not set output source mode" );
+          CHECK_ERR( PvAttrEnumSet(handle_, "Strobe1Mode", "Exposing"),
+                     "Could not set output mode" );
+        }
+
+        CHECK_ERR( PvAttrEnumSet(handle_, "PixelFormat", formatModes[pfmode]),
                    "Could not set trigger mode" );
         CHECK_ERR( PvAttrEnumSet(handle_, "FrameStartTriggerMode", triggerModes[fmode]),
                    "Could not set trigger mode" );

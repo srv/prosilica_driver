@@ -132,8 +132,7 @@ private:
     int           trigger_mode_;
     bool          auto_adjust_stream_bytes_per_second_;
 
-    prosilica::OutSelectorMode sync_out_selector_;
-    prosilica::PixelFormat pixel_format_;
+    prosilica::PixelFormatMode pixel_format_;
 
     tPvUint32 sensor_width_, sensor_height_;
     tPvUint32 max_binning_x, max_binning_y, dummy;
@@ -374,7 +373,7 @@ private:
             {
                 case prosilica::Software:
                     NODELET_INFO("starting camera %s in software trigger mode", hw_id_.c_str());
-                    camera_->start(prosilica::Software, 1., prosilica::Continuous, sync_out_selector_, pixel_format_);
+                    camera_->start(prosilica::Software, 1., prosilica::Continuous, pixel_format_);
                     if(update_rate_ > 0)
                     {
                         update_timer_.setPeriod(ros::Rate(update_rate_).expectedCycleTime());
@@ -384,25 +383,25 @@ private:
                 case prosilica::Freerun:
                     NODELET_INFO("starting camera %s in freerun trigger mode", hw_id_.c_str());
                     camera_->setFrameCallback(boost::bind(&ProsilicaNodelet::publishImage, this, _1));
-                    camera_->start(prosilica::Freerun, 1., prosilica::Continuous, sync_out_selector_, pixel_format_);
+                    camera_->start(prosilica::Freerun, 1., prosilica::Continuous, pixel_format_);
                     break;
                 case prosilica::FixedRate:
                     NODELET_INFO_STREAM("starting camera " << hw_id_.c_str() <<
                         " in fixedrate trigger mode at " << update_rate_ << " hz.");
                     camera_->setFrameCallback(boost::bind(&ProsilicaNodelet::publishImage, this, _1));
-                    camera_->start(prosilica::FixedRate, update_rate_, prosilica::Continuous, sync_out_selector_, pixel_format_);
+                    camera_->start(prosilica::FixedRate, update_rate_, prosilica::Continuous, pixel_format_);
                     break;
                 case prosilica::SyncIn1:
                     NODELET_INFO_STREAM("starting camera " << hw_id_.c_str() <<
                         " in sync1 trigger mode at " << update_rate_ << " hz.");
                     camera_->setFrameCallback(boost::bind(&ProsilicaNodelet::publishImage, this, _1));
-                    camera_->start(prosilica::SyncIn1, update_rate_, prosilica::Continuous, sync_out_selector_, pixel_format_);
+                    camera_->start(prosilica::SyncIn1, update_rate_, prosilica::Continuous, pixel_format_);
                     break;
                 case prosilica::SyncIn2:
                     NODELET_INFO_STREAM("starting camera " << hw_id_.c_str() <<
                         " in sync2 trigger mode at " << update_rate_ << " hz.");
                     camera_->setFrameCallback(boost::bind(&ProsilicaNodelet::publishImage, this, _1));
-                    camera_->start(prosilica::SyncIn2, update_rate_, prosilica::Continuous, sync_out_selector_, pixel_format_);
+                    camera_->start(prosilica::SyncIn2, update_rate_, prosilica::Continuous, pixel_format_);
                     break;
                 default:
                     break;
@@ -739,28 +738,6 @@ private:
         else
         {
             NODELET_ERROR("Invalid trigger mode '%s' in reconfigure request", config.trigger_mode.c_str());
-        }
-
-        // Sync out selector
-        if (config.sync_out_selector == "SyncOut1")
-        {
-            sync_out_selector_ = prosilica::SyncOut1;
-        }
-        else if (config.sync_out_selector == "SyncOut2")
-        {
-            sync_out_selector_ = prosilica::SyncOut2;
-        }
-        else if (config.sync_out_selector == "SyncOut3")
-        {
-            sync_out_selector_ = prosilica::SyncOut3;
-        }
-        else if (config.sync_out_selector == "SyncOut4")
-        {
-            sync_out_selector_ = prosilica::SyncOut4;
-        }
-        else
-        {
-            NODELET_ERROR("Invalid sync out selector mode '%s' in reconfigure request", config.sync_out_selector.c_str());
         }
 
         // pixel format selector

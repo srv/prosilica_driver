@@ -104,23 +104,15 @@ enum AcquisitionMode
   Recorder
 };
 
-enum OutSelectorMode
+enum PixelFormatMode
 {
-  SyncOut1,
-  SyncOut2,
-  SyncOut3,
-  SyncOut4
-};
-
-enum FormatMode
-{
-  Mono8;
-  Mono12;
-  Mono12Packed;
-  BayerRG8;
-  BayerRG12Packed;
-  BayerRG12;
-  RGB8Packed;
+  Mono8,
+  Mono12,
+  Mono12Packed,
+  BayerRG8,
+  BayerRG12Packed,
+  BayerRG12,
+  RGB8Packed,
   BGR8Packed
 };
 
@@ -147,7 +139,7 @@ public:
 
   void setKillCallback(boost::function<void (unsigned long)> callback);
   //! Start capture.
-  void start(FrameStartTriggerMode = Freerun, tPvFloat32 frame_rate = 30, AcquisitionMode = Continuous, OutSelectorMode = SyncOut1, FormatMode = Mono8);
+  void start(FrameStartTriggerMode = Freerun, tPvFloat32 frame_rate = 30, AcquisitionMode = Continuous, PixelFormatMode = Mono8);
   //! Stop capture.
   void stop();
   //! remove callback

@@ -4,13 +4,13 @@
   <include file="$(find prosilica_camera)/launch/camera_base.launch">
     <arg name="camera_ns"     value="/stereo_down/left" />
     <arg name="camera_name"   value="left" />
-    <arg name="ip_address"    value="192.168.2.200" />
+    <arg name="guid"          value="5026390" />
     <arg name="frame_id"      value="/stereo_down/left_optical" />
   </include>
   <include file="$(find prosilica_camera)/launch/camera_base.launch">
     <arg name="camera_ns"     value="/stereo_down/right" />
     <arg name="camera_name"   value="right" />
-    <arg name="ip_address"    value="192.168.3.100" />
+    <arg name="guid"          value="5026389" />
     <arg name="frame_id"      value="/stereo_down/right_optical" />
   </include>
 
