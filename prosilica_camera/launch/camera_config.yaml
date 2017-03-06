@@ -1,0 +1,51 @@
+/stereo_down:
+  left:
+    left:
+      trigger_mode: "fixedrate"
+      trig_rate: 10
+      auto_exposure: True
+      exposure: 0.025
+      auto_gain: True
+      gain: 0
+      auto_whitebalance: True
+      whitebalance_red: 100
+      whitebalance_blue: 100
+      binning_x: 1
+      binning_y: 1
+      x_offset: 0
+      y_offset: 0
+      width: 0
+      height: 0
+      frame_id: ""
+      trig_timestamp_topic: "trigger"
+      auto_adjust_stream_bytes_per_second: False
+      stream_bytes_per_second: 115000000
+      exposure_auto_max: 0.05
+      exposure_auto_target: 50
+      gain_auto_max: 24
+      gain_auto_target: 50
+  right:
+    right:
+      trigger_mode: "syncin1"
+      trig_rate: 10
+      auto_exposure: True
+      exposure: 0.025
+      auto_gain: True
+      gain: 0
+      auto_whitebalance: True
+      whitebalance_red: 100
+      whitebalance_blue: 100
+      binning_x: 1
+      binning_y: 1
+      x_offset: 0
+      y_offset: 0
+      width: 0
+      height: 0
+      frame_id: ""
+      trig_timestamp_topic: "trigger"
+      auto_adjust_stream_bytes_per_second: False
+      stream_bytes_per_second: 115000000
+      exposure_auto_max: 0.05
+      exposure_auto_target: 50
+      gain_auto_max: 24
+      gain_auto_target: 50/stereo_down/

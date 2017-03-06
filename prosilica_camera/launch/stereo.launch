@@ -1,0 +1,21 @@
+<launch>
+
+  <rosparam command="load" file="$(find prosilica_camera)/launch/camera_config.yaml"/>
+  <include file="$(find prosilica_camera)/launch/camera_base.launch">
+    <arg name="camera_ns"     value="/stereo_down/left" />
+    <arg name="camera_name"   value="left" />
+    <arg name="ip_address"    value="192.168.2.200" />
+    <arg name="frame_id"      value="/stereo_down/left_optical" />
+  </include>
+  <include file="$(find prosilica_camera)/launch/camera_base.launch">
+    <arg name="camera_ns"     value="/stereo_down/right" />
+    <arg name="camera_name"   value="right" />
+    <arg name="ip_address"    value="192.168.3.100" />
+    <arg name="frame_id"      value="/stereo_down/right_optical" />
+  </include>
+
+  <include file="$(find turbot)/launch/modules/stereo_pipeline.launch">
+    <arg name="stereo" value="stereo_down" />
+  </include>
+
+</launch>

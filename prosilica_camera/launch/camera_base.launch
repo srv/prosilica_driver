@@ -1,0 +1,20 @@
+<launch>
+
+  <!-- Namespace to publish in -->
+  <arg name="camera_ns" default="camera" />
+  <arg name="camera_name" default="camera" />
+  <arg name="guid" default="" />
+  <arg name="ip_address" default="" />
+
+  <!-- tf frame id associated with this camera -->
+  <arg name="frame_id" default="$(arg camera_name)_optical_frame" />
+
+  <!-- The camera node -->
+  <node ns="$(arg camera_ns)" name="$(arg camera_name)" pkg="prosilica_camera" type="prosilica_node" output="screen">
+    <remap from="camera" to="$(arg camera_ns)" />
+    <param name="guid" type="str" value="$(arg guid)" />
+    <param name="ip_address" type="str" value="$(arg ip_address)" />
+    <param name="frame_id" value="$(arg frame_id)" />
+  </node>
+
+</launch>
