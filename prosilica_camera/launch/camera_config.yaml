@@ -10,13 +10,13 @@
       auto_whitebalance: True
       whitebalance_red: 100
       whitebalance_blue: 100
-      binning_x: 1
-      binning_y: 1
-      x_offset: 0
-      y_offset: 0
-      width: 0
-      height: 0
-      frame_id: ""
+      binning_x: 2
+      binning_y: 2
+      x_offset: 8
+      y_offset: 8
+      width: 1920
+      height: 1440
+      frame_id: "/stereo_down/left_optical"
       trig_timestamp_topic: "trigger"
       auto_adjust_stream_bytes_per_second: False
       stream_bytes_per_second: 115000000
@@ -35,17 +35,17 @@
       auto_whitebalance: True
       whitebalance_red: 100
       whitebalance_blue: 100
-      binning_x: 1
-      binning_y: 1
-      x_offset: 0
-      y_offset: 0
-      width: 0
-      height: 0
-      frame_id: ""
+      binning_x: 2
+      binning_y: 2
+      x_offset: 8
+      y_offset: 8
+      width: 1920
+      height: 1440
+      frame_id: "/stereo_down/right_optical"
       trig_timestamp_topic: "trigger"
       auto_adjust_stream_bytes_per_second: False
       stream_bytes_per_second: 115000000
       exposure_auto_max: 0.05
       exposure_auto_target: 50
       gain_auto_max: 24
-      gain_auto_target: 50/stereo_down/
+      gain_auto_target: 50
