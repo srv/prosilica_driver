@@ -130,9 +130,10 @@ private:
     // Dynamic reconfigure parameters
     double        update_rate_;
     int           trigger_mode_;
-    int           sync_out_selector_;
-    int           pixel_format_;
     bool          auto_adjust_stream_bytes_per_second_;
+
+    prosilica::OutSelectorMode sync_out_selector_;
+    prosilica::PixelFormat pixel_format_;
 
     tPvUint32 sensor_width_, sensor_height_;
     tPvUint32 max_binning_x, max_binning_y, dummy;
