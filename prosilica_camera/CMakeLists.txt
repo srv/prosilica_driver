@@ -3,18 +3,18 @@ project(prosilica_camera)
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
 
-find_package(catkin REQUIRED COMPONENTS 
+find_package(catkin REQUIRED COMPONENTS
    prosilica_gige_sdk
    roscpp
    std_msgs
    sensor_msgs
    diagnostic_updater
    image_transport
-   self_test 
+   self_test
    driver_base
    rosconsole
-   dynamic_reconfigure 
-   camera_calibration_parsers 
+   dynamic_reconfigure
+   camera_calibration_parsers
    polled_camera
    nodelet
    nodelet_topic_tools
@@ -31,20 +31,22 @@ catkin_package()
 
 add_library(prosilica src/libprosilica/prosilica.cpp)
 target_link_libraries(prosilica ${catkin_LIBRARIES})
+add_dependencies(prosilica ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_library(prosilica_nodelet src/nodes/prosilica_nodelet.cpp)
 target_link_libraries(prosilica_nodelet prosilica ${catkin_LIBRARIES})
 class_loader_hide_library_symbols(prosilica_nodelet)
+add_dependencies(prosilica_nodelet ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(prosilica_node src/nodes/prosilica_node.cpp)
-target_link_libraries(prosilica_node 
+target_link_libraries(prosilica_node
    prosilica
    prosilica_nodelet
-   ${Boost_LIBRARIES} 
+   ${Boost_LIBRARIES}
    ${catkin_LIBRARIES})
-add_dependencies(prosilica_node 
+add_dependencies(prosilica_node
    ${catkin_EXPORTED_TARGETS}
-   ${prosilica_camera_EXPORTED_TARGETS})
+   ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 # disabled until it's mature??
 #rosbuild_add_executable(find_camera find_camera.cpp)
@@ -53,8 +55,8 @@ add_executable(write_memory src/utilities/write_memory.cpp)
 target_link_libraries(write_memory prosilica ${catkin_LIBRARIES})
 
 add_executable(read_memory src/utilities/read_memory.cpp)
-target_link_libraries(read_memory prosilica 
-   ${catkin_LIBRARIES} 
+target_link_libraries(read_memory prosilica
+   ${catkin_LIBRARIES}
    ${Boost_LIBRARIES})
 
 add_executable(set_ip src/utilities/set_ip.cpp)

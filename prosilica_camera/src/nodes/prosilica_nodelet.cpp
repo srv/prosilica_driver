@@ -135,7 +135,7 @@ private:
     prosilica::PixelFormatMode pixel_format_;
 
     tPvUint32 sensor_width_, sensor_height_;
-    tPvUint32 max_binning_x, max_binning_y, dummy;
+    tPvUint32 max_binning_x, max_binning_y, max_decimation_x, max_decimation_y, dummy;
     int count_;
 
     // Dynamic Reconfigure
@@ -312,7 +312,8 @@ private:
             boost::this_thread::sleep(boost::posix_time::seconds(open_camera_retry_period_));
         }
         loadIntrinsics();
-        start();
+
+        // start();
     }
 
     std::string getAvailableCameras()
@@ -339,10 +340,12 @@ private:
             std::string buffer(prosilica::Camera::USER_MEMORY_SIZE, '\0');
             camera_->readUserMemory(&buffer[0], prosilica::Camera::USER_MEMORY_SIZE);
 
-            PvAttrRangeUint32(camera_->handle(), "BinningX", &dummy, &max_binning_x);
-            PvAttrRangeUint32(camera_->handle(), "BinningY", &dummy, &max_binning_y);
-            PvAttrRangeUint32(camera_->handle(), "Width",    &dummy, &sensor_width_);
-            PvAttrRangeUint32(camera_->handle(), "Height",   &dummy, &sensor_height_);
+            PvAttrRangeUint32(camera_->handle(), "BinningX",                &dummy, &max_binning_x);
+            PvAttrRangeUint32(camera_->handle(), "BinningY",                &dummy, &max_binning_y);
+            PvAttrRangeUint32(camera_->handle(), "DecimationHorizontal",    &dummy, &max_decimation_x);
+            PvAttrRangeUint32(camera_->handle(), "DecimationVertical",      &dummy, &max_decimation_y);
+            PvAttrRangeUint32(camera_->handle(), "Width",                   &dummy, &sensor_width_);
+            PvAttrRangeUint32(camera_->handle(), "Height",                  &dummy, &sensor_height_);
 
 
             // Parse calibration file
@@ -580,6 +583,12 @@ private:
                 camera_->getAttribute("BinningX", binning_x);
                 camera_->getAttribute("BinningY", binning_y);
             }
+            tPvUint32 decimation_x = 1, decimation_y = 1;
+            if (camera_->hasAttribute("DecimationHorizontal"))
+            {
+                camera_->getAttribute("DecimationHorizontal", decimation_x);
+                camera_->getAttribute("DecimationVertical", decimation_y);
+            }
 
             // Binning averages bayer samples, so just call it mono8 in that case
             if (frame->Format == ePvFmtBayer8 && (binning_x > 1 || binning_y > 1))
@@ -588,16 +597,20 @@ private:
             if (!frameToImage(frame, img))
                 return false;
 
+            // Adjust full-res ROI to binning ROI
+            int bin_dec_x = std::max(binning_x, decimation_x);
+            int bin_dec_y = std::max(binning_y, decimation_y);
+
             // Set the operational parameters in CameraInfo (binning, ROI)
-            cam_info.binning_x = binning_x;
-            cam_info.binning_y = binning_y;
+            cam_info.binning_x = bin_dec_x;
+            cam_info.binning_y = bin_dec_y;
             // ROI in CameraInfo is in unbinned coordinates, need to scale up
-            cam_info.roi.x_offset = frame->RegionX * binning_x;
-            cam_info.roi.y_offset = frame->RegionY * binning_y;
-            cam_info.roi.height = frame->Height * binning_y;
-            cam_info.roi.width = frame->Width * binning_x;
-            cam_info.roi.do_rectify = (frame->Height != sensor_height_ / binning_y) ||
-                                       (frame->Width  != sensor_width_  / binning_x);
+            cam_info.roi.x_offset = frame->RegionX * bin_dec_x;
+            cam_info.roi.y_offset = frame->RegionY * bin_dec_y;
+            cam_info.roi.height = frame->Height * bin_dec_y;
+            cam_info.roi.width = frame->Width * bin_dec_x;
+            cam_info.roi.do_rectify = (frame->Height != sensor_height_ / bin_dec_y) ||
+                                       (frame->Width  != sensor_width_  / bin_dec_x);
 
             if(auto_adjust_stream_bytes_per_second_ && camera_->hasAttribute("StreamBytesPerSecond"))
                 camera_->setAttribute("StreamBytesPerSecond", (tPvUint32)(115000000/num_cameras));
@@ -615,7 +628,6 @@ private:
     {
         // NOTE: 16-bit and Yuv formats not supported
         static const char* BAYER_ENCODINGS[] = { "bayer_rggb8", "bayer_gbrg8", "bayer_grbg8", "bayer_bggr8" };
-
         std::string encoding;
         if (frame->Format == ePvFmtMono8)       encoding = sensor_msgs::image_encodings::MONO8;
         else if (frame->Format == ePvFmtBayer8) encoding = BAYER_ENCODINGS[frame->BayerPattern];
@@ -745,37 +757,61 @@ private:
         {
             pixel_format_ = prosilica::Mono8;
         }
-        else if (config.pixel_format == "Mono12")
+        else if (config.pixel_format == "Mono16")
         {
-            pixel_format_ = prosilica::Mono12;
+            pixel_format_ = prosilica::Mono16;
+        }
+        else if (config.pixel_format == "Bayer8")
+        {
+            pixel_format_ = prosilica::Bayer8;
+        }
+        else if (config.pixel_format == "Bayer16")
+        {
+            pixel_format_ = prosilica::Bayer16;
+        }
+        else if (config.pixel_format == "Rgb24")
+        {
+            pixel_format_ = prosilica::Rgb24;
+        }
+        else if (config.pixel_format == "Bgr24")
+        {
+            pixel_format_ = prosilica::Bgr24;
+        }
+        else if (config.pixel_format == "Yuv411")
+        {
+            pixel_format_ = prosilica::Yuv411;
+        }
+        else if (config.pixel_format == "Yuv422")
+        {
+            pixel_format_ = prosilica::Yuv422;
+        }
+        else if (config.pixel_format == "Yuv444")
+        {
+            pixel_format_ = prosilica::Yuv444;
+        }
+        else if (config.pixel_format == "Rgba32")
+        {
+            pixel_format_ = prosilica::Rgba32;
+        }
+        else if (config.pixel_format == "Bgra32")
+        {
+            pixel_format_ = prosilica::Bgra32;
+        }
+        else if (config.pixel_format == "Rgb48")
+        {
+            pixel_format_ = prosilica::Rgb48;
         }
         else if (config.pixel_format == "Mono12Packed")
         {
             pixel_format_ = prosilica::Mono12Packed;
         }
-        else if (config.pixel_format == "BayerRG8")
+        else if (config.pixel_format == "Bayer12Packed")
         {
-            pixel_format_ = prosilica::BayerRG8;
-        }
-        else if (config.pixel_format == "BayerRG12Packed")
-        {
-            pixel_format_ = prosilica::BayerRG12Packed;
-        }
-        else if (config.pixel_format == "BayerRG12")
-        {
-            pixel_format_ = prosilica::BayerRG12;
-        }
-        else if (config.pixel_format == "RGB8Packed")
-        {
-            pixel_format_ = prosilica::RGB8Packed;
-        }
-        else if (config.pixel_format == "BGR8Packed")
-        {
-            pixel_format_ = prosilica::BGR8Packed;
+            pixel_format_ = prosilica::Bayer12Packed;
         }
         else
         {
-            NODELET_ERROR("Invalid sync out selector mode '%s' in reconfigure request", config.pixel_format.c_str());
+            NODELET_ERROR("Invalid pixel format '%s' in reconfigure request", config.pixel_format.c_str());
         }
 
 
@@ -870,6 +906,20 @@ private:
             config.binning_x = config.binning_y = 1;
         }
 
+        // Decimation configuration
+        if (camera_->hasAttribute("DecimationHorizontal"))
+        {
+            config.decimation_x = std::min(config.decimation_x, (int)max_decimation_x);
+            config.decimation_y = std::min(config.decimation_y, (int)max_decimation_y);
+
+            camera_->setDecimation(config.decimation_x, config.decimation_y);
+        }
+        else if (config.decimation_x > 1 || config.decimation_y > 1)
+        {
+            NODELET_WARN("Decimation not available for this camera.");
+            config.decimation_x = config.decimation_y = 1;
+        }
+
         // Region of interest configuration
         // Make sure ROI fits in image
         config.x_offset = std::min(config.x_offset, (int)sensor_width_ - 1);
@@ -894,8 +944,8 @@ private:
 
         camera_->setRoi(x_offset, y_offset, width, height);
 
-      // TF frame
-      img_.header.frame_id = cam_info_.header.frame_id = config.frame_id;
+        // TF frame
+        img_.header.frame_id = cam_info_.header.frame_id = config.frame_id;
 
         // Normally the node adjusts the bandwidth used by the camera during diagnostics, to use as
         // much as possible without dropping packets. But this can create interference if two

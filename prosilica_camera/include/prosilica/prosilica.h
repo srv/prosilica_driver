@@ -107,13 +107,19 @@ enum AcquisitionMode
 enum PixelFormatMode
 {
   Mono8,
-  Mono12,
+  Mono16,
+  Bayer8,
+  Bayer16,
+  Rgb24,
+  Bgr24,
+  Yuv411,
+  Yuv422,
+  Yuv444,
+  Rgba32,
+  Bgra32,
+  Rgb48,
   Mono12Packed,
-  BayerRG8,
-  BayerRG12Packed,
-  BayerRG12,
-  RGB8Packed,
-  BGR8Packed
+  Bayer12Packed
 };
 
 enum AutoSetting
@@ -157,6 +163,7 @@ public:
               unsigned int width, unsigned int height);
   void setRoiToWholeFrame();
   void setBinning(unsigned int binning_x = 1, unsigned int binning_y = 1);
+  void setDecimation(unsigned int decimation_x = 1, unsigned int decimation_y = 1);
 
   //! Returns true if camera supports the attribute.
   bool hasAttribute(const std::string &name);

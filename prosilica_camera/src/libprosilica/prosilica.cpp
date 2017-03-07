@@ -58,7 +58,7 @@ static const unsigned int MAX_CAMERA_LIST = 10;
 static const char* autoValues[] = {"Manual", "Auto", "AutoOnce"};
 static const char* triggerModes[] = {"Freerun", "SyncIn1", "SyncIn2", "FixedRate", "Software"};
 static const char* acquisitionModes[] = {"Continuous","SingleFrame","MultiFrame","Recorder"};
-static const char* formatModes[] = {"Mono8", "Mono12", "Mono12Packed", "BayerRG8", "BayerRG12Packed", "BayerRG12", "RGB8Packed", "BGR8Packed"};
+static const char* pixelFormatModes[] = {"Mono8","Mono16","Bayer8","Bayer16","Rgb24","Bgr24","Yuv411","Yuv422","Yuv444","Rgba32","Bgra32","Rgb48","Mono12Packed","Bayer12Packed"};
 static const char* errorStrings[] = {"No error",
                                      "Unexpected camera fault",
                                      "Unexpected fault in PvApi or driver",
@@ -294,8 +294,8 @@ void Camera::start(FrameStartTriggerMode fmode, tPvFloat32 frame_rate, Acquisiti
                      "Could not set output mode" );
         }
 
-        CHECK_ERR( PvAttrEnumSet(handle_, "PixelFormat", formatModes[pfmode]),
-                   "Could not set trigger mode" );
+        CHECK_ERR( PvAttrEnumSet(handle_, "PixelFormat", pixelFormatModes[pfmode]),
+                   "Could not set pixel format" );
         CHECK_ERR( PvAttrEnumSet(handle_, "FrameStartTriggerMode", triggerModes[fmode]),
                    "Could not set trigger mode" );
         CHECK_ERR( PvCommandRun(handle_, "AcquisitionStart"),
@@ -445,6 +445,18 @@ void Camera::setBinning(unsigned int binning_x, unsigned int binning_y)
              "Couldn't set horizontal binning" );
   CHECK_ERR( PvAttrUint32Set(handle_, "BinningY", binning_y),
              "Couldn't set vertical binning" );
+}
+
+void Camera::setDecimation(unsigned int decimation_x, unsigned int decimation_y)
+{
+  // Permit setting to "no binning" on cameras without binning support
+  if (!hasAttribute("DecimationHorizontal") && decimation_x == 1 && decimation_y == 1)
+    return;
+
+  CHECK_ERR( PvAttrUint32Set(handle_, "DecimationHorizontal", decimation_x),
+             "Couldn't set horizontal decimation" );
+  CHECK_ERR( PvAttrUint32Set(handle_, "DecimationVertical", decimation_y),
+             "Couldn't set vertical decimation" );
 }
 
 bool Camera::hasAttribute(const std::string &name)
