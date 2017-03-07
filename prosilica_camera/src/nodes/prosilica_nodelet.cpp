@@ -221,7 +221,7 @@ private:
         openCamera();
 
         // Advertise topics
-        ros::NodeHandle image_nh(nh);
+        ros::NodeHandle image_nh(pn);
         image_transport::ImageTransport image_it(image_nh);
         image_publisher_ = image_it.advertiseCamera("image_raw", 1);
         poll_srv_ = polled_camera::advertise(nh, "request_image", &ProsilicaNodelet::pollCallback, this);
