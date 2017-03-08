@@ -601,16 +601,18 @@ private:
             int bin_dec_x = std::max(binning_x, decimation_x);
             int bin_dec_y = std::max(binning_y, decimation_y);
 
+            cam_info.width = frame->Width;
+            cam_info.height = frame->Height;
+
             // Set the operational parameters in CameraInfo (binning, ROI)
-            cam_info.binning_x = bin_dec_x;
-            cam_info.binning_y = bin_dec_y;
+            cam_info.binning_x = 1;
+            cam_info.binning_y = 1;
             // ROI in CameraInfo is in unbinned coordinates, need to scale up
-            cam_info.roi.x_offset = frame->RegionX * bin_dec_x;
-            cam_info.roi.y_offset = frame->RegionY * bin_dec_y;
-            cam_info.roi.height = frame->Height * bin_dec_y;
-            cam_info.roi.width = frame->Width * bin_dec_x;
-            cam_info.roi.do_rectify = (frame->Height != sensor_height_ / bin_dec_y) ||
-                                       (frame->Width  != sensor_width_  / bin_dec_x);
+            cam_info.roi.x_offset = 0;
+            cam_info.roi.y_offset = 0;
+            cam_info.roi.height = 0;
+            cam_info.roi.width = 0;
+            cam_info.roi.do_rectify = false;
 
             if(auto_adjust_stream_bytes_per_second_ && camera_->hasAttribute("StreamBytesPerSecond"))
                 camera_->setAttribute("StreamBytesPerSecond", (tPvUint32)(115000000/num_cameras));
@@ -652,12 +654,12 @@ private:
         sensor_msgs::CameraInfo &info = req.camera_info;
 
         // Sanity check: the image dimensions should match the max resolution of the sensor.
-        if (info.width != sensor_width_ || info.height != sensor_height_)
+        if (info.width != last_config_.width || info.height != last_config_.height)
         {
             rsp.success = false;
             rsp.status_message = (boost::format("Camera_info resolution %ix%i does not match current video "
                                                 "setting, camera running at resolution %ix%i.")
-                                                 % info.width % info.height % sensor_width_ % sensor_height_).str();
+                                                 % info.width % info.height % last_config_.width % last_config_.height).str();
             NODELET_ERROR("%s", rsp.status_message.c_str());
             return true;
         }

@@ -438,7 +438,7 @@ void Camera::setRoiToWholeFrame()
 void Camera::setBinning(unsigned int binning_x, unsigned int binning_y)
 {
   // Permit setting to "no binning" on cameras without binning support
-  if (!hasAttribute("BinningX") && binning_x == 1 && binning_y == 1)
+  if (!hasAttribute("BinningX"))
     return;
 
   CHECK_ERR( PvAttrUint32Set(handle_, "BinningX", binning_x),
@@ -450,7 +450,7 @@ void Camera::setBinning(unsigned int binning_x, unsigned int binning_y)
 void Camera::setDecimation(unsigned int decimation_x, unsigned int decimation_y)
 {
   // Permit setting to "no binning" on cameras without binning support
-  if (!hasAttribute("DecimationHorizontal") && decimation_x == 1 && decimation_y == 1)
+  if (!hasAttribute("DecimationHorizontal"))
     return;
 
   CHECK_ERR( PvAttrUint32Set(handle_, "DecimationHorizontal", decimation_x),
