@@ -36,7 +36,6 @@
 #include <nodelet/nodelet.h>
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
-#include <driver_base/SensorLevels.h>
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 #include <camera_calibration_parsers/parse_ini.h>
@@ -56,6 +55,14 @@
 
 bool prosilica_inited = false;//for if the nodelet is loaded multiple times in the same manager
 int num_cameras = 0;
+
+namespace driver_base {
+  namespace SensorLevels {
+    int RECONFIGURE_CLOSE = 3;
+    int RECONFIGURE_STOP = 1;
+    int RECONFIGURE_RUNNING = 0;
+  }
+}
 
 namespace prosilica_camera
 {
