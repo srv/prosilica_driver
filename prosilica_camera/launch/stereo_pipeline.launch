@@ -1,0 +1,39 @@
+<launch>
+
+  <arg name="stereo" />
+  <arg name="enable_decimate_x2" default="true"/>
+  <arg name="enable_decimate_x4" default="false"/>
+  <arg name="launch_in_nuc" default="true"/>
+
+  <include file="$(find prosilica_camera)/launch/stereo_image_proc.launch" >
+    <arg name="stereo" value="$(arg stereo)" />
+    <arg name="disparity_params" value="$(find prosilica_camera)/config/disparity_params_stereo.yaml" />
+  </include>
+
+  <!-- x2 decimate -->
+  <group if="$(arg enable_decimate_x2)">
+    <include file="$(find prosilica_camera)/launch/stereo_crop_decimate.launch" >
+      <arg name="stereo" value="$(arg stereo)" />
+      <arg name="decimation" value="2" />
+    </include>
+    <include file="$(find prosilica_camera)/launch/stereo_image_proc.launch" >
+      <arg name="stereo" value="$(arg stereo)/scaled_x2" />
+      <arg name="disparity_params" value="$(find prosilica_camera)/config/disparity_scaled_x2_params_stereo.yaml"/>
+      <arg name="launch_in_nuc" value="$(arg launch_in_nuc)" />
+    </include>
+  </group>
+
+  <!-- x4 decimate -->
+  <group if="$(arg enable_decimate_x4)">
+    <include file="$(find prosilica_camera)/launch/stereo_crop_decimate.launch" >
+      <arg name="stereo" value="$(arg stereo)" />
+      <arg name="decimation" value="4" />
+    </include>
+    <include file="$(find prosilica_camera)/launch/stereo_image_proc.launch" >
+      <arg name="stereo" value="$(arg stereo)/scaled_x4" />
+      <arg name="disparity_params" value="$(find prosilica_camera)/config/disparity_scaled_x4_params_stereo.yaml"/>
+    </include>
+  </group>
+
+
+</launch>

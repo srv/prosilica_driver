@@ -48,6 +48,7 @@
 #include <sensor_msgs/SetCameraInfo.h>
 
 #include <boost/thread.hpp>
+#include <boost/format.hpp>
 
 #include <prosilica_camera/ProsilicaCameraConfig.h>
 #include "prosilica/prosilica.h"
