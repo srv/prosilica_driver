@@ -1,0 +1,9 @@
+<launch>
+    <rosparam command="load" file="$(find prosilica_camera)/config/stereo_down.yaml"/>
+    <include file="$(find prosilica_camera)/launch/prosilica_camera_base.launch">
+        <arg name="camera_ns"     value="/stereo_down" />
+        <arg name="camera_name"   value="right"/>
+        <arg name="ip_address"    value="10.0.3.2" />   <!-- 192.168.1.81 -->
+        <arg name="frame_id"      value="/stereo_down/left_optical" />
+    </include>
+</launch>

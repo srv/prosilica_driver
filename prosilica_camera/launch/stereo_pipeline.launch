@@ -1,7 +1,7 @@
 <launch>
 
   <arg name="stereo" />
-  <arg name="enable_decimate_x2" default="true"/>
+  <arg name="enable_decimate_x2" default="false"/>
   <arg name="enable_decimate_x4" default="false"/>
   <arg name="launch_in_nuc" default="true"/>
 
